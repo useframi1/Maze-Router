@@ -7,24 +7,29 @@ enum Type {
 	Obstacle, //0
 	Source,   //1
 	Target,   //2
-	Empty     //3
+	Empty,    //3
+    Via       //4
 };
 
 struct  Cell {
 	Type type;
 	int cost;
-    int x;
-    int y;
-    int layer;
 };
 
-class Maze{
+struct  Coordinate {
+	int x;
+	int y;
+    int layer;
+    Type type;
+};
+
+class MazeRouter{
     private: 
     unordered_map <int, vector<vector<Cell>>> grid;
-    vector<vector<Cell>> nets;
+    vector<vector<Coordinate>> nets;
     int length;
     int width;
-    int bend_pen; //float?
+    int bend_pen;
     int via_pen;
     string output_file;
     
@@ -46,11 +51,11 @@ class Maze{
 
     };
 
-    void Write_Route(){ //saves progress in file.
+    void WriteRoute(){ //saves progress in file.
 
     };
 
-    void Empty_Grid(){ //re-initializes all cell costs to 0
+    void EmptyGrid(){ //re-initializes all cell costs to 0
 
         for(int i=0;i<grid.size();i++){
             for(int j=0;j<grid[i].size();j++){
@@ -69,7 +74,6 @@ class Maze{
 };
 
 int main(){
-
     return 0;
 }
 
