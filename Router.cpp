@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
+#include <iomanip> 
 using namespace std;
 
 enum Type {
@@ -18,13 +19,13 @@ struct  Cell {
 };
 
 struct  Coordinate {
-	int x;
-	int y;
+	int row;
+	int col;
     int layer;
     Type type;
 
     bool operator==(const Coordinate& rhs) const {
-        return x == rhs.x && y == rhs.y && layer == rhs.layer;
+        return row == rhs.row && col == rhs.col && layer == rhs.layer;
     }
 };
 
@@ -47,44 +48,59 @@ class MazeRouter{
 
         vector<vector<Cell>> grid1 = 
         {
-            {empty, empty, target},
-            {empty, obstacle, empty},
-            {source, empty, empty}
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, source, empty, empty, empty, empty, empty, empty},
+            {obstacle, obstacle, obstacle, obstacle, obstacle, obstacle, obstacle, obstacle},
+            {obstacle, obstacle, obstacle, obstacle, obstacle, obstacle, obstacle, obstacle},
+            {obstacle, obstacle, obstacle, obstacle, obstacle, obstacle, obstacle, obstacle},
+            {empty, empty, empty, empty, empty, empty, target, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty}
 
         };
 
         vector<vector<Cell>> grid2 = 
         {
-            {empty, empty, empty},
-            {empty, empty, empty},
-            {empty, empty, empty}
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {obstacle, obstacle, obstacle, obstacle, obstacle, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty}
 
         };
 
         grid[0] = grid1;
         grid[1] = grid2;
 
-        length = 3;
-        width = 3;
-        bend_pen = 2;
-        via_pen = 3;
+        length = 8;
+        width = 8;
+        bend_pen = 3;
+        via_pen = 5;
     };
 
-    void printgrid(){
-        for(int i=0;i<3;i++){
-            for(int j=0;j<3;j++){
-                cout<<grid[0][i][j].cost<<" ";
+    void printgrid() {
+        cout << "M1:\n";
+        cout << "========\n";
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                cout << setw(3) << grid[0][i][j].cost << " "; // setw for uniform spacing
             }
-            cout<<endl;
+            cout << endl;
         }
 
-        for(int i=0;i<3;i++){
-            for(int j=0;j<3;j++){
-                cout<<grid[1][i][j].cost<<" ";
+        cout << "\nM2:\n";
+        cout << "========\n";
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                cout << setw(3) << grid[1][i][j].cost << " ";
             }
-            cout<<endl;
+            cout << endl;
         }
     }
+
 
     void youffy_function1(string file){ //sets grid
         //intializes nets vector
@@ -100,94 +116,94 @@ class MazeRouter{
         }
     };
 
-    bool Update(int x, int y, int layer, vector<Coordinate>&border){
+    bool Update(int row, int col, int layer, vector<Coordinate>&border){
         Coordinate temp;
         
-        if(x+1<length){ //1 to the right
-            if(grid[layer][x+1][y].type==Type::Target)
+        if(row+1<length){ //1 up
+            if(grid[layer][row+1][col].type==Type::Target)
                 return 1;
-            if(grid[layer][x+1][y].type!=Type::Obstacle && grid[layer][x+1][y].type!=Type::Source){ 
-                temp.x = x;
-                temp.y = y;
+            if(grid[layer][row+1][col].type!=Type::Obstacle && grid[layer][row+1][col].type!=Type::Source){ 
+                temp.row = row+1;
+                temp.col = col;
                 temp.layer = layer;
                 if(layer==0){ //Metal layer 1 (Horizontal)
-                    if((grid[layer][x+1][y].cost > grid[layer][x][y].cost+1)||(grid[layer][x+1][y].cost==0))
-                        grid[layer][x+1][y].cost = grid[layer][x][y].cost+1;
+                    if((grid[layer][row+1][col].cost > grid[layer][row][col].cost+bend_pen)||(grid[layer][row+1][col].cost==0))
+                        grid[layer][row+1][col].cost = grid[layer][row][col].cost+bend_pen;
                 }
                 else{ //Metal layer 2 (Vertical)
-                    if((grid[layer][x+1][y].cost > grid[layer][x][y].cost+bend_pen)||(grid[layer][x+1][y].cost==0))
-                        grid[layer][x+1][y].cost = grid[layer][x][y].cost+bend_pen;
+                    if((grid[layer][row+1][col].cost > grid[layer][row][col].cost+1)||(grid[layer][row+1][col].cost==0))
+                        grid[layer][row+1][col].cost = grid[layer][row][col].cost+1;
                 }
                 pushback(border, temp);
             }
         }
         
-        if(x-1>=0){ //1 to the left
-            if(grid[layer][x-1][y].type==Type::Target)
+        if(row-1>=0){ //1 down
+            if(grid[layer][row-1][col].type==Type::Target)
                 return 1;
-            if(grid[layer][x-1][y].type!=Type::Obstacle && grid[layer][x-1][y].type!=Type::Source){ 
-                temp.x = x;
-                temp.y = y;
+            if(grid[layer][row-1][col].type!=Type::Obstacle && grid[layer][row-1][col].type!=Type::Source){ 
+                temp.row = row-1;
+                temp.col = col;
                 temp.layer = layer;
                 if(layer==0){ //Metal layer 1 (Horizontal)
-                    if((grid[layer][x-1][y].cost > grid[layer][x][y].cost+1)||(grid[layer][x-1][y].cost==0))
-                        grid[layer][x-1][y].cost = grid[layer][x][y].cost+1;
+                    if((grid[layer][row-1][col].cost > grid[layer][row][col].cost+bend_pen)||(grid[layer][row-1][col].cost==0))
+                        grid[layer][row-1][col].cost = grid[layer][row][col].cost+bend_pen;
                 }
                 else{ //Metal layer 2 (Vertical)
-                    if((grid[layer][x-1][y].cost > grid[layer][x][y].cost+bend_pen)||(grid[layer][x-1][y].cost==0))
-                        grid[layer][x-1][y].cost = grid[layer][x][y].cost+bend_pen;
+                    if((grid[layer][row-1][col].cost > grid[layer][row][col].cost+1)||(grid[layer][row-1][col].cost==0))
+                        grid[layer][row-1][col].cost = grid[layer][row][col].cost+1;
                 }
                 pushback(border, temp);
             }
         }
         
-        if(y+1<width){ //1 up
-            if(grid[layer][x][y+1].type==Type::Target)
+        if(col+1<length){ //1 to the right
+            if(grid[layer][row][col+1].type==Type::Target)
                 return 1;
-            if(grid[layer][x][y+1].type!=Type::Obstacle && grid[layer][x][y+1].type!=Type::Source){ 
-                temp.x = x;
-                temp.y = y;
+            if(grid[layer][row][col+1].type!=Type::Obstacle && grid[layer][row][col+1].type!=Type::Source){ 
+                temp.row = row;
+                temp.col = col+1;
                 temp.layer = layer;
                 if(layer==0){ //Metal layer 1 (Horizontal)
-                    if((grid[layer][x][y+1].cost > grid[layer][x][y].cost+bend_pen)||(grid[layer][x][y+1].cost==0))
-                        grid[layer][x][y+1].cost = grid[layer][x][y].cost+bend_pen;
+                    if((grid[layer][row][col+1].cost > grid[layer][row][col].cost+1)||(grid[layer][row][col+1].cost==0))
+                        grid[layer][row][col+1].cost = grid[layer][row][col].cost+1;
                 }
                 else{ //Metal layer 2 (Vertical)
-                    if((grid[layer][x][y+1].cost > grid[layer][x][y].cost+1)||(grid[layer][x][y+1].cost==0))
-                        grid[layer][x][y+1].cost = grid[layer][x][y].cost+1;
+                    if((grid[layer][row][col+1].cost > grid[layer][row][col].cost+bend_pen)||(grid[layer][row][col+1].cost==0))
+                        grid[layer][row][col+1].cost = grid[layer][row][col].cost+bend_pen;
                 }
                 pushback(border, temp);
             }
         }
         
-        if(y-1>=0){ //1 down
-            if(grid[layer][x][y-1].type==Type::Target)
+        if(col-1>=0){ //1 to the left
+            if(grid[layer][row][col-1].type==Type::Target)
                 return 1;
-            if(grid[layer][x][y-1].type!=Type::Obstacle && grid[layer][x][y-1].type!=Type::Source){ 
-                temp.x = x;
-                temp.y = y;
+            if(grid[layer][row][col-1].type!=Type::Obstacle && grid[layer][row][col-1].type!=Type::Source){ 
+                temp.row = row;
+                temp.col = col-1;
                 temp.layer = layer;
                 if(layer==0){ //Metal layer 1 (Horizontal)
-                    if((grid[layer][x][y-1].cost > grid[layer][x][y].cost+bend_pen)||(grid[layer][x][y-1].cost==0))
-                        grid[layer][x][y-1].cost = grid[layer][x][y].cost+bend_pen;
+                    if((grid[layer][row][col-1].cost > grid[layer][row][col].cost+1)||(grid[layer][row][col-1].cost==0))
+                        grid[layer][row][col-1].cost = grid[layer][row][col].cost+1;
                 }
                 else{ //Metal layer 2 (Vertical)
-                    if((grid[layer][x][y-1].cost > grid[layer][x][y].cost+1)||(grid[layer][x][y-1].cost==0))
-                        grid[layer][x][y-1].cost = grid[layer][x][y].cost+1;
+                    if((grid[layer][row][col-1].cost > grid[layer][row][col].cost+bend_pen)||(grid[layer][row][col-1].cost==0))
+                        grid[layer][row][col-1].cost = grid[layer][row][col].cost+bend_pen;
                 }
                 pushback(border, temp);
             }
         }
         
-        if(grid[(layer+1)%2][x][y].type==Type::Target) //1 across layers
+        if(grid[(layer+1)%2][row][col].type==Type::Target) //1 across layers
             return 1;
-        if(grid[(layer+1)%2][x][y].type!=Type::Obstacle && grid[(layer+1)%2][x][y].type!=Type::Source){ 
-            temp.x = x;
-            temp.y = y;
+        if(grid[(layer+1)%2][row][col].type!=Type::Obstacle && grid[(layer+1)%2][row][col].type!=Type::Source){ 
+            temp.row = row;
+            temp.col = col;
             temp.layer = (layer+1)%2;
-            if((grid[(layer+1)%2][x][y].cost > grid[(layer+1)%2][x][y].cost+via_pen)||(grid[(layer+1)%2][x][y].cost==0)){
-                grid[(layer+1)%2][x][y].cost = grid[(layer+1)%2][x][y].cost+via_pen;
-                grid[(layer+1)%2][x][y].type = Type::Via;
+            if((grid[(layer+1)%2][row][col].cost > grid[layer][row][col].cost+via_pen)||(grid[(layer+1)%2][row][col].cost==0)){
+                grid[(layer+1)%2][row][col].cost = grid[layer][row][col].cost+via_pen;
+                grid[(layer+1)%2][row][col].type = Type::Via;
             }
             pushback(border, temp);
         }
@@ -205,11 +221,8 @@ class MazeRouter{
         while(!hit){
             {
                 size = border.size();
-                cout << "Size: " << size << endl;
                 for(int i=0;i<size;i++){
-                    cout<< "First Source: " << border[0].x << " " << border[0].y << " " << border[0].layer << endl << endl;
-                    
-                    hit = Update(border[0].x,border[0].y,border[0].layer, border); //black box
+                    hit = Update(border[0].row,border[0].col,border[0].layer, border); //black borow
                     border.erase(border.begin());
                     if(hit){
                         break;
@@ -226,7 +239,7 @@ class MazeRouter{
         
     };
 
-    void Propagate(){ //called per net. Propagates to determine path and returns path sequence while marking it as an obstacle for next nets.
+    void Propagate(){ //called per net. Propagates to determine path and returns path sequence while marking it as an obstacle for nerowt nets.
 
     };
 
@@ -255,7 +268,7 @@ class MazeRouter{
 int main(){
 
     MazeRouter router;
-    router.Fill({{2,0,0,Type::Source}});
+    router.Fill({{2,1,0,Type::Source}});
 
     return 0;
 }
