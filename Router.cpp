@@ -13,17 +13,15 @@ enum Type {
 struct  Cell {
 	Type type;
 	int cost;
-};
-
-struct  Pin {
-	int x;
-	int y;
+    int x;
+    int y;
+    int layer;
 };
 
 class Maze{
     private: 
     unordered_map <int, vector<vector<Cell>>> grid;
-    vector<vector<Pin>> nets;
+    vector<vector<Cell>> nets;
     int length;
     int width;
     int bend_pen; //float?
@@ -69,6 +67,11 @@ class Maze{
     };
 
 };
+
+int main(){
+
+    return 0;
+}
 
 
 
