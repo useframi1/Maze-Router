@@ -35,16 +35,113 @@ class MazeRouter{
     
     public:
     Maze(string inputf, string outputf){
-        youffy_function(inputf);
+        youffy_function1(inputf);
         output_file = outputf; 
     };
 
-    void youffy_function(string file){
-        //intializes data structures through file
+    void youffy_function1(string file){ //sets grid
+        //intializes nets vector
     };
 
-    void Fill(vector<Pin> net){ //called per net. Does cost assignment till target reached.
+    void youffy_function2(vector<Coordinate>net){ //per net
+        //intializes grid
+    };
 
+    bool Update(int x, int y, int layer, vector<Coordinate>unvisited){
+        Coordinate temp;
+        if(grid[layer][x+1][y].type==Target||grid[layer][x-1][y].type==Target||grid[layer][x][y+1].type==Target||grid[layer][x][y-1].type==Target||||grid[(layer+1)%2][x][y].type==Target){ 
+                return 1;       
+        }
+        else{
+            if(grid[layer][x+1][y].type!=Obstacle){ //1 to the right
+                temp.x = x;
+                temp.y = y;
+                temp.layer = layer;
+                if(layer==0){
+                    if((grid[layer][x+1][y].cost > grid[layer][x][y].cost+1)||(grid[layer][x+1][y].cost==0))
+                        grid[layer][x+1][y].cost = grid[layer][x][y].cost+1;
+                }
+                else{
+                    if((grid[layer][x+1][y].cost > grid[layer][x][y].cost+bend_pen)||(grid[layer][x+1][y].cost==0))
+                        grid[layer][x+1][y].cost = grid[layer][x][y].cost+bend_pen;
+                }
+                unvisited.push_back(temp);
+            }
+             if(grid[layer][x-1][y].type!=Obstacle){ //1 to the left
+                temp.x = x;
+                temp.y = y;
+                temp.layer = layer;
+                if(layer==0){
+                    if((grid[layer][x-1][y].cost > grid[layer][x][y].cost+1)||(grid[layer][x-1][y].cost==0))
+                        grid[layer][x-1][y].cost = grid[layer][x][y].cost+1;
+                }
+                else{
+                    if((grid[layer][x-1][y].cost > grid[layer][x][y].cost+bend_pen)||(grid[layer][x-1][y].cost==0))
+                        grid[layer][x-1][y].cost = grid[layer][x][y].cost+bend_pen;
+                }
+                unvisited.push_back(temp);
+            }
+             if(grid[layer][x][y+1].type!=Obstacle){ //1 up
+                temp.x = x;
+                temp.y = y;
+                temp.layer = layer;
+                if(layer==0){
+                    if((grid[layer][x][y+1].cost > grid[layer][x][y].cost+bend_pen)||(grid[layer][x][y+1].cost==0))
+                        grid[layer][x][y+1].cost = grid[layer][x][y].cost+bend_pen;
+                }
+                else{
+                    if((grid[layer][x][y+1].cost > grid[layer][x][y].cost+1)||(grid[layer][x][y+1].cost==0))
+                        grid[layer][x][y+1].cost = grid[layer][x][y].cost+1;
+                }
+                unvisited.push_back(temp);
+            }
+             if(grid[layer][x][y-1].type!=Obstacle){ //1 down
+                temp.x = x;
+                temp.y = y;
+                temp.layer = layer;
+                if(layer==0){
+                    if((grid[layer][x][y-1].cost > grid[layer][x][y].cost+bend_pen)||(grid[layer][x][y-1].cost==0))
+                        grid[layer][x][y-1].cost = grid[layer][x][y].cost+bend_pen;
+                }
+                else{
+                    if((grid[layer][x][y-1].cost > grid[layer][x][y].cost+1)||(grid[layer][x][y-1].cost==0))
+                        grid[layer][x][y-1].cost = grid[layer][x][y].cost+1;
+                }
+                unvisited.push_back(temp);
+            }
+            if(grid[(layer+1)%2][x][y].type!=Obstacle){ //1 across layers
+                temp.x = x;
+                temp.y = y;
+                temp.layer = (layer+1)%2;
+                if((grid[(layer+1)%2][x][y].cost > grid[(layer+1)%2][x][y].cost+via_pen)||(grid[(layer+1)%2][x][y].cost==0))
+                    grid[(layer+1)%2][x][y].cost = grid[(layer+1)%2][x][y].cost+via_pen;
+                unvisited.push_back(temp);
+            }
+            return 0;
+        }
+
+    }
+
+    void Fill(vector<Coordinate>sources){ //called per net per target. Does cost assignment till target reached.
+        bool hit=false;
+        vector<Coordinate> unvisited;
+        int size;
+        unvisited=sources;     
+        while(!hit){
+            {
+                size = unvisited.size()
+                for(int i=0;i<size;i++){
+                    hit = Update(unvisited[0].x,unvisited[0].y,unvisited[0].layer, unvisited); //black box
+                    unvisited.erase(unvisited.begin());
+                    if(hit){
+                        break;
+                    }
+                    //now we have the new unvisited
+                }
+            }
+            
+        }
+        
     };
 
     void Propagate(){ //called per net. Propagates to determine path and returns path sequence while marking it as an obstacle for next nets.
