@@ -29,12 +29,13 @@ struct Coordinate
     int x;
     int y;
     int layer;
-    Type type;
 };
 
 class MazeRouter
 {
-private:
+    // private:
+
+public:
     unordered_map<int, vector<vector<Cell>>> grid;
     vector<vector<Coordinate>> nets;
     int length;
@@ -43,21 +44,22 @@ private:
     int via_pen;
     string input_file;
     string output_file;
-
-public:
     /// @brief The constructor for the maze router
     /// @param input_file The path of the input file having all the router information
     /// @param output_file The path of the output file that will hold the routes for all the nets
     MazeRouter(string input_file, string output_file);
 
-    /// @brief Initializes the maze info such as dimensions, penalties, and obstructions.
-    void initializeRouterInfo(fstream &file);
+    /// @brief Initializes the maze router
+    void initialize();
 
-    /// @brief Initializes all the nets
-    void initializeNets(fstream &file);
+    /// @brief Add Obstruction to the grid
+    void addObstruction(string line);
 
-    /// @brief Initializes the grid
-    void initializeGrid();
+    /// @brief Add a net to the nets vector
+    void addNet(string line);
+
+    /// @brief Maps the net to the grid
+    void mapNetToGrid(vector<Coordinate> net);
 
     /// @brief Called per net. Does cost assignment till target is reached
     /// @param net The coordinates of all the cells in the net
@@ -71,6 +73,12 @@ public:
 
     /// @brief Re-Initializes all cell costs to 0
     void resetGridCosts();
+
+    /// @brief Prints the grid
+    void printGrid();
+
+    /// @brief Prints the nets
+    void printNets();
 
     /// @brief Puts all functions above together. This will be the only function called in main.
     void route();
