@@ -9,14 +9,7 @@ int main()
     cout << "Bend penalty: " << router.bend_pen << endl;
     cout << "Via penalty: " << router.via_pen << endl;
 
-    router.printGrid();
-    router.printNets();
-
-    for (int i = 0; i < router.nets.size(); i++)
-    {
-        router.mapNetToGrid(router.nets[i]);
-        router.printGrid();
-    }
+    router.route();
 
     return 0;
 }

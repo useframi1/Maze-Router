@@ -5,6 +5,10 @@
 #include <fstream>
 #include <vector>
 #include <unordered_map>
+#include <climits>
+#include <iomanip>
+#include <algorithm>
+
 using namespace std;
 
 #define NUM_LAYERS 2
@@ -29,6 +33,11 @@ struct Coordinate
     int row;
     int col;
     int layer;
+
+    bool operator==(const Coordinate &rhs) const
+    {
+        return row == rhs.row && col == rhs.col && layer == rhs.layer;
+    }
 };
 
 class MazeRouter
@@ -44,6 +53,7 @@ public:
     int via_pen;
     string input_file;
     string output_file;
+
     /// @brief The constructor for the maze router
     /// @param input_file The path of the input file having all the router information
     /// @param output_file The path of the output file that will hold the routes for all the nets
@@ -61,21 +71,29 @@ public:
     /// @brief Maps the net to the grid
     void mapNetToGrid(vector<Coordinate> net);
 
+    void pushback(vector<Coordinate> &sources, Coordinate value);
+
+    /// @brief Updates the costs of the cells in the grid
+    bool updateCells(int row, int col, int layer, vector<Coordinate> &sources, Coordinate &target);
+
     /// @brief Called per net. Does cost assignment till target is reached
     /// @param net The coordinates of all the cells in the net
-    void fill(vector<Coordinate> net);
+    Coordinate fill(vector<Coordinate> sources);
 
     /// @brief Called per net. Propagates to determine path and returns path sequence while marking it as an obstacle for next nets.
-    void propagate();
+    vector<Coordinate> back_propagate(Coordinate target);
 
     /// @brief Saves progress in file.
-    void writeRoute();
+    void writeRoute(vector<Coordinate> route);
 
     /// @brief Re-Initializes all cell costs to 0
     void resetGridCosts();
 
     /// @brief Prints the grid
-    void printGrid();
+    void printGridCosts();
+
+    /// @brief Prints the grid
+    void printGridTypes();
 
     /// @brief Prints the nets
     void printNets();
