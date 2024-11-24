@@ -1,8 +1,14 @@
 #include "router.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    MazeRouter router("test.txt", "output.txt");
+    if (argc != 3)
+    {
+        cerr << "Usage: " << argv[0] << " <input_file> <output_file>" << endl;
+        return 1;
+    }
+
+    MazeRouter router(argv[1], argv[2]);
 
     cout << "Router initialized\n";
     cout << "Maze dimentions: " << router.length << " x " << router.width << endl;
