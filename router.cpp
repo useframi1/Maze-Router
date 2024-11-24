@@ -51,11 +51,11 @@ void MazeRouter::initialize()
 
 void MazeRouter::addObstruction(string line)
 {
-    int layer, x, y;
-    sscanf(line.c_str(), "OBS (%d, %d, %d)", &layer, &x, &y);
-    if (layer >= 0 && layer < NUM_LAYERS && x >= 0 && x < length && y >= 0 && y < width)
+    int layer, row, col;
+    sscanf(line.c_str(), "OBS (%d, %d, %d)", &layer, &col, &row);
+    if (layer >= 0 && layer < NUM_LAYERS && row >= 0 && row < length && col >= 0 && col < width)
     {
-        grid[layer][x][y].type = Type::Obstruction;
+        grid[layer][row][col].type = Type::Obstruction;
     }
     else
     {
@@ -86,11 +86,11 @@ void MazeRouter::addNet(string line)
             break;
         }
 
-        int layer, x, y;
-        sscanf(coords.substr(start + 1, end - start - 1).c_str(), "%d, %d, %d", &layer, &x, &y);
-        if (layer >= 0 && layer < NUM_LAYERS && x >= 0 && x < length && y >= 0 && y < width)
+        int layer, row, col;
+        sscanf(coords.substr(start + 1, end - start - 1).c_str(), "%d, %d, %d", &layer, &col, &row);
+        if (layer >= 0 && layer < NUM_LAYERS && row >= 0 && row < length && col >= 0 && col < width)
         {
-            netCoordinates.push_back({x, y, layer});
+            netCoordinates.push_back({row, col, layer});
         }
         else
         {
@@ -107,7 +107,7 @@ void MazeRouter::mapNetToGrid(vector<Coordinate> net)
 {
     for (int i = 0; i < net.size(); i++)
     {
-        grid[net[i].layer][net[i].x][net[i].y].type = i == 0 ? Type::Source : Type::Target;
+        grid[net[i].layer][net[i].row][net[i].col].type = i == 0 ? Type::Source : Type::Target;
     }
 }
 
@@ -161,7 +161,7 @@ void MazeRouter::printNets()
         cout << "Net " << i << ": ";
         for (int j = 0; j < nets[i].size(); j++)
         {
-            cout << "(" << nets[i][j].layer << ", " << nets[i][j].x << ", " << nets[i][j].y << ") ";
+            cout << "(" << nets[i][j].layer << ", " << nets[i][j].col << ", " << nets[i][j].row << ") ";
         }
         cout << endl;
     }

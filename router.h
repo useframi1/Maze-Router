@@ -26,8 +26,8 @@ struct Cell
 
 struct Coordinate
 {
-    int x;
-    int y;
+    int row;
+    int col;
     int layer;
 };
 

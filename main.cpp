@@ -12,5 +12,11 @@ int main()
     router.printGrid();
     router.printNets();
 
+    for (int i = 0; i < router.nets.size(); i++)
+    {
+        router.mapNetToGrid(router.nets[i]);
+        router.printGrid();
+    }
+
     return 0;
 }
