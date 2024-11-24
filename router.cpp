@@ -265,9 +265,6 @@ Coordinate MazeRouter::fill(vector<Coordinate> sources)
             }
             // now we have the new border
         }
-        // for (int i = 0; i < 1000000000; i++)
-        // {
-        // }
     }
 
     return target;
@@ -295,7 +292,6 @@ vector<Coordinate> MazeRouter::back_propagate(Coordinate target)
             if (grid[next_cell.layer][next_cell.row - 1][next_cell.col].type == Type::Source)
             {
                 next_cell.row = next_cell.row - 1;
-                cout << "Coordinate" << " " << next_cell.row << " " << next_cell.col << " " << next_cell.layer << " is a source" << endl;
                 route.insert(route.begin(), next_cell);
                 return route;
             }
@@ -314,7 +310,6 @@ vector<Coordinate> MazeRouter::back_propagate(Coordinate target)
             if (grid[next_cell.layer][next_cell.row + 1][next_cell.col].type == Type::Source)
             {
                 next_cell.row = next_cell.row + 1;
-                cout << "Coordinate" << " " << next_cell.row << " " << next_cell.col << " " << next_cell.layer << " is a source" << endl;
                 route.insert(route.begin(), next_cell);
                 return route;
             }
@@ -333,7 +328,6 @@ vector<Coordinate> MazeRouter::back_propagate(Coordinate target)
             if (grid[next_cell.layer][next_cell.row][next_cell.col - 1].type == Type::Source)
             {
                 next_cell.col = next_cell.col - 1;
-                cout << "Coordinate" << " " << next_cell.row << " " << next_cell.col << " " << next_cell.layer << " is a source" << endl;
                 route.insert(route.begin(), next_cell);
                 return route;
             }
@@ -352,7 +346,6 @@ vector<Coordinate> MazeRouter::back_propagate(Coordinate target)
             if (grid[next_cell.layer][next_cell.row][next_cell.col + 1].type == Type::Source)
             {
                 next_cell.col = next_cell.col + 1;
-                cout << "Coordinate" << " " << next_cell.row << " " << next_cell.col << " " << next_cell.layer << " is a source" << endl;
                 route.insert(route.begin(), next_cell);
                 return route;
             }
@@ -397,6 +390,7 @@ void MazeRouter::writeRoute(vector<Coordinate> route)
     {
         cout << "(" << route[i].layer << " " << route[i].col << " " << route[i].row << ") -> ";
     }
+    cout<< "END\n";
 }
 
 void MazeRouter::resetGridCosts()
@@ -465,13 +459,13 @@ void MazeRouter::route()
 {
     for (int i = 0; i < nets.size(); i++)
     {
+        cout << "\n------------------------------------\n";
+        cout << "Routing Net " << i << endl;
         mapNetToGrid(nets[i]);
         vector<Coordinate> sources = {nets[i][0]};
         vector<Coordinate> route;
         for (int j = 0; j < nets[i].size() - 1; j++)
         {
-            cout << "\nLooking for target " << j << endl;
-            cout << endl;
             resetGridCosts();
 
             Coordinate target = fill(sources);
@@ -479,10 +473,13 @@ void MazeRouter::route()
             vector<Coordinate> temp_route = back_propagate(target);
             for (int k = 0; k < temp_route.size(); k++)
             {
-                cout << "(" << temp_route[k].layer << " " << temp_route[k].col << " " << temp_route[k].row << ") -> ";
                 route.push_back(temp_route[k]);
             }
+            
+            cout << "\nRoute for target " << j << ":\n";
+            writeRoute(temp_route);
             cout << endl;
+            
             sources.clear();
             for (int k = 0; k < route.size(); k++)
             {
@@ -495,8 +492,9 @@ void MazeRouter::route()
         {
             grid[route[j].layer][route[j].row][route[j].col].type = Type::Obstruction;
         }
-        printGridTypes();
+        // printGridTypes();
 
         // writeRoute(route);
+        cout << "\n------------------------------------\n";
     }
 }
