@@ -33,7 +33,6 @@ struct Coordinate
     int row;
     int col;
     int layer;
-
     bool operator==(const Coordinate &rhs) const
     {
         return row == rhs.row && col == rhs.col && layer == rhs.layer;
@@ -68,16 +67,19 @@ public:
     /// @brief Add a net to the nets vector
     void addNet(string line);
 
+    /// @brief Orders the nets based on the total manhattan distance of the net
+    void orderNets();
+
     /// @brief Maps the net to the grid
     void mapNetToGrid(vector<Coordinate> net);
 
+    /// @brief Add the value in a vector only if it's not found
     void pushback(vector<Coordinate> &sources, Coordinate value);
 
     /// @brief Updates the costs of the cells in the grid
     bool updateCells(int row, int col, int layer, vector<Coordinate> &sources, Coordinate &target);
 
     /// @brief Called per net. Does cost assignment till target is reached
-    /// @param net The coordinates of all the cells in the net
     Coordinate fill(vector<Coordinate> sources);
 
     /// @brief Called per net. Propagates to determine path and returns path sequence while marking it as an obstacle for next nets.
@@ -89,10 +91,10 @@ public:
     /// @brief Re-Initializes all cell costs to 0
     void resetGridCosts();
 
-    /// @brief Prints the grid
+    /// @brief Prints the grid costs
     void printGridCosts();
 
-    /// @brief Prints the grid
+    /// @brief Prints the grid types
     void printGridTypes();
 
     /// @brief Prints the nets

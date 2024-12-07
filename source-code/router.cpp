@@ -103,6 +103,44 @@ void MazeRouter::addNet(string line)
     nets.push_back(netCoordinates);
 }
 
+void MazeRouter::orderNets()
+{
+
+    if (nets.size() == 0 || nets.size() == 1)
+    {
+        return;
+    }
+
+    vector<int> total_manhattan_distances;
+    for (int i = 0; i < nets.size(); i++)
+    {
+        int total_manhattan_distance = 0;
+        for (int j = 0; j < nets[i].size() - 1; j++)
+        {
+            total_manhattan_distance += (abs(nets[i][0].layer - nets[i][j + 1].layer) +
+                                         abs(nets[i][0].row - nets[i][j + 1].row) +
+                                         abs(nets[i][0].col - nets[i][j + 1].col));
+        }
+        cout << "Net " << i << " Manhattan Distance: " << total_manhattan_distance << endl;
+        total_manhattan_distances.push_back(total_manhattan_distance);
+    }
+
+    // Sort the nets based on the total manhattan distance
+    for (int i = 0; i < nets.size(); i++)
+    {
+        for (int j = i + 1; j < nets.size(); j++)
+        {
+            if (total_manhattan_distances[i] > total_manhattan_distances[j])
+            {
+                swap(nets[i], nets[j]);
+                swap(total_manhattan_distances[i], total_manhattan_distances[j]);
+            }
+        }
+    }
+
+    return;
+}
+
 void MazeRouter::mapNetToGrid(vector<Coordinate> net)
 {
     for (int i = 0; i < net.size(); i++)
@@ -138,14 +176,21 @@ bool MazeRouter::updateCells(int row, int col, int layer, vector<Coordinate> &so
             if (layer == 0)
             { // Metal layer 1 (Horizontal)
                 if ((grid[layer][row + 1][col].cost > grid[layer][row][col].cost + bend_pen) || (grid[layer][row + 1][col].cost == 0))
+                {
                     grid[layer][row + 1][col].cost = grid[layer][row][col].cost + bend_pen;
+                    grid[layer][row + 1][col].type = Type::Empty;
+                    pushback(sources, temp);
+                }
             }
             else
             { // Metal layer 2 (Vertical)
                 if ((grid[layer][row + 1][col].cost > grid[layer][row][col].cost + 1) || (grid[layer][row + 1][col].cost == 0))
+                {
                     grid[layer][row + 1][col].cost = grid[layer][row][col].cost + 1;
+                    grid[layer][row + 1][col].type = Type::Empty;
+                    pushback(sources, temp);
+                }
             }
-            pushback(sources, temp);
         }
     }
 
@@ -164,14 +209,21 @@ bool MazeRouter::updateCells(int row, int col, int layer, vector<Coordinate> &so
             if (layer == 0)
             { // Metal layer 1 (Horizontal)
                 if ((grid[layer][row - 1][col].cost > grid[layer][row][col].cost + bend_pen) || (grid[layer][row - 1][col].cost == 0))
+                {
                     grid[layer][row - 1][col].cost = grid[layer][row][col].cost + bend_pen;
+                    grid[layer][row - 1][col].type = Type::Empty;
+                    pushback(sources, temp);
+                }
             }
             else
             { // Metal layer 2 (Vertical)
                 if ((grid[layer][row - 1][col].cost > grid[layer][row][col].cost + 1) || (grid[layer][row - 1][col].cost == 0))
+                {
                     grid[layer][row - 1][col].cost = grid[layer][row][col].cost + 1;
+                    grid[layer][row - 1][col].type = Type::Empty;
+                    pushback(sources, temp);
+                }
             }
-            pushback(sources, temp);
         }
     }
 
@@ -190,14 +242,21 @@ bool MazeRouter::updateCells(int row, int col, int layer, vector<Coordinate> &so
             if (layer == 0)
             { // Metal layer 1 (Horizontal)
                 if ((grid[layer][row][col + 1].cost > grid[layer][row][col].cost + 1) || (grid[layer][row][col + 1].cost == 0))
+                {
                     grid[layer][row][col + 1].cost = grid[layer][row][col].cost + 1;
+                    grid[layer][row][col + 1].type = Type::Empty;
+                    pushback(sources, temp);
+                }
             }
             else
             { // Metal layer 2 (Vertical)
                 if ((grid[layer][row][col + 1].cost > grid[layer][row][col].cost + bend_pen) || (grid[layer][row][col + 1].cost == 0))
+                {
                     grid[layer][row][col + 1].cost = grid[layer][row][col].cost + bend_pen;
+                    grid[layer][row][col + 1].type = Type::Empty;
+                    pushback(sources, temp);
+                }
             }
-            pushback(sources, temp);
         }
     }
 
@@ -216,14 +275,21 @@ bool MazeRouter::updateCells(int row, int col, int layer, vector<Coordinate> &so
             if (layer == 0)
             { // Metal layer 1 (Horizontal)
                 if ((grid[layer][row][col - 1].cost > grid[layer][row][col].cost + 1) || (grid[layer][row][col - 1].cost == 0))
+                {
                     grid[layer][row][col - 1].cost = grid[layer][row][col].cost + 1;
+                    grid[layer][row][col - 1].type = Type::Empty;
+                    pushback(sources, temp);
+                }
             }
             else
             { // Metal layer 2 (Vertical)
                 if ((grid[layer][row][col - 1].cost > grid[layer][row][col].cost + bend_pen) || (grid[layer][row][col - 1].cost == 0))
+                {
                     grid[layer][row][col - 1].cost = grid[layer][row][col].cost + bend_pen;
+                    grid[layer][row][col - 1].type = Type::Empty;
+                    pushback(sources, temp);
+                }
             }
-            pushback(sources, temp);
         }
     }
 
@@ -241,8 +307,8 @@ bool MazeRouter::updateCells(int row, int col, int layer, vector<Coordinate> &so
         {
             grid[(layer + 1) % 2][row][col].cost = grid[layer][row][col].cost + via_pen;
             grid[(layer + 1) % 2][row][col].type = Type::Via;
+            pushback(sources, temp);
         }
-        pushback(sources, temp);
     }
     return 0;
 }
@@ -251,20 +317,26 @@ Coordinate MazeRouter::fill(vector<Coordinate> sources)
 {
     bool hit = false;
     int size;
-    Coordinate target;
-    while (!hit)
+    int k = 0;
+    Coordinate target = {-1, -1, -1};
+    while (!hit && !sources.empty())
     {
         size = sources.size();
         for (int i = 0; i < size; i++)
         {
-            hit = updateCells(sources[0].row, sources[0].col, sources[0].layer, sources, target); // black borow
+            if (!hit)
+                hit = updateCells(sources[0].row, sources[0].col, sources[0].layer, sources, target);
             sources.erase(sources.begin());
-            if (hit)
-            {
-                break;
-            }
-            // now we have the new border
         }
+        // cout << "Wave" << ++k << ":\n";
+        // printGridTypes();
+        // printGridCosts();
+    }
+
+    size = sources.size();
+    for (int i = 0; i < size; i++)
+    {
+        updateCells(sources[0].row, sources[0].col, sources[0].layer, sources, target);
     }
 
     return target;
@@ -274,17 +346,35 @@ vector<Coordinate> MazeRouter::back_propagate(Coordinate target)
 {
     Coordinate next_cell = {target.row, target.col, target.layer};
     int min_cost;
+    bool via_switch = false;
     char direction = '\0';
+    int num_interations = 0;
     vector<Coordinate> route = {target};
+
+    cout << "Target: (" << target.layer << ", " << target.col << ", " << target.row << ")\n";
 
     while (grid[next_cell.layer][next_cell.row][next_cell.col].type != Type::Source)
     {
-        min_cost = INT_MAX;
-        if (grid[next_cell.layer][next_cell.row][next_cell.col].type == Type::Via)
+        cout << (num_interations);
+        if (num_interations++ > 1000)
         {
+            cout << "Infinite loop detected during back propogation: No Route Found\n";
+            break;
+        }
+
+        min_cost = INT_MAX;
+        // cout << "Current cell: (" << next_cell.layer << ", " << next_cell.col << ", " << next_cell.row << ")\n";
+        if (grid[next_cell.layer][next_cell.row][next_cell.col].type == Type::Via && !via_switch)
+        {
+            via_switch = true;
+            grid[next_cell.layer][next_cell.row][next_cell.col].type = Type::Empty;
             next_cell.layer = (next_cell.layer + 1) % 2;
             route.insert(route.begin(), next_cell);
             continue;
+        }
+        else
+        {
+            via_switch = false;
         }
 
         if (next_cell.row - 1 >= 0)
@@ -390,7 +480,7 @@ void MazeRouter::writeRoute(vector<Coordinate> route)
     {
         cout << "(" << route[i].layer << " " << route[i].col << " " << route[i].row << ") -> ";
     }
-    cout<< "END\n";
+    cout << "END\n";
 }
 
 void MazeRouter::resetGridCosts()
@@ -457,6 +547,8 @@ void MazeRouter::printNets()
 
 void MazeRouter::route()
 {
+    orderNets();
+
     for (int i = 0; i < nets.size(); i++)
     {
         cout << "\n------------------------------------\n";
@@ -467,19 +559,25 @@ void MazeRouter::route()
         for (int j = 0; j < nets[i].size() - 1; j++)
         {
             resetGridCosts();
-
             Coordinate target = fill(sources);
-            // printGridCosts();
+            printGridCosts();
+
+            if (target.row == -1 && target.col == -1 && target.layer == -1)
+            {
+                cout << "\n\nNo Route Found for Net " << i << endl;
+                break;
+            }
+
             vector<Coordinate> temp_route = back_propagate(target);
             for (int k = 0; k < temp_route.size(); k++)
             {
                 route.push_back(temp_route[k]);
             }
-            
+
             cout << "\nRoute for target " << j << ":\n";
             writeRoute(temp_route);
             cout << endl;
-            
+
             sources.clear();
             for (int k = 0; k < route.size(); k++)
             {
@@ -492,8 +590,8 @@ void MazeRouter::route()
         {
             grid[route[j].layer][route[j].row][route[j].col].type = Type::Obstruction;
         }
-        // printGridTypes();
 
+        // cout << "\nFinal Route for Net " << i << ":\n";
         // writeRoute(route);
         cout << "\n------------------------------------\n";
     }
