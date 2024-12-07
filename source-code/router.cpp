@@ -121,8 +121,16 @@ void MazeRouter::orderNets()
                                          abs(nets[i][0].row - nets[i][j + 1].row) +
                                          abs(nets[i][0].col - nets[i][j + 1].col));
         }
-        cout << "Net " << i << " Manhattan Distance: " << total_manhattan_distance << endl;
+        // cout << "Net " << i << " Manhattan Distance: " << total_manhattan_distance << endl;
         total_manhattan_distances.push_back(total_manhattan_distance);
+    }
+     cout<<"\nNet order before Manhattan distance ordering:\n";
+     for(int i=0; i<total_manhattan_distances.size();i++){
+        for (int j = 0; j < nets[i].size(); j++)
+                {
+                    cout << "(" << nets[i][j].layer << ", " << nets[i][j].col << ", " << nets[i][j].row << ") ";
+                }
+        cout<<"Manhattan Distance:"<<total_manhattan_distances[i]<<endl;
     }
 
     // Sort the nets based on the total manhattan distance
@@ -137,6 +145,15 @@ void MazeRouter::orderNets()
             }
         }
     }
+     cout<<"\nNet order after Manhattan distance ordering:\n";
+    for(int i=0; i<total_manhattan_distances.size();i++){
+        for (int j = 0; j < nets[i].size(); j++)
+                {
+                    cout << "(" << nets[i][j].layer << ", " << nets[i][j].col << ", " << nets[i][j].row << ") ";
+                }
+        cout<<"Manhattan Distance:"<<total_manhattan_distances[i]<<endl;
+    }
+
 
     return;
 }
@@ -341,6 +358,7 @@ Coordinate MazeRouter::fill(vector<Coordinate> sources)
 
     return target;
 }
+int via_count = 0;
 
 vector<Coordinate> MazeRouter::back_propagate(Coordinate target)
 {
@@ -370,6 +388,7 @@ vector<Coordinate> MazeRouter::back_propagate(Coordinate target)
             grid[next_cell.layer][next_cell.row][next_cell.col].type = Type::Empty;
             next_cell.layer = (next_cell.layer + 1) % 2;
             route.insert(route.begin(), next_cell);
+            via_count++;
             continue;
         }
         else
@@ -481,6 +500,10 @@ void MazeRouter::writeRoute(vector<Coordinate> route)
         cout << "(" << route[i].layer << " " << route[i].col << " " << route[i].row << ") -> ";
     }
     cout << "END\n";
+
+    //Writing into the file
+
+    
 }
 
 void MazeRouter::resetGridCosts()
@@ -548,6 +571,10 @@ void MazeRouter::printNets()
 void MazeRouter::route()
 {
     orderNets();
+    vector<Coordinate> longest_route;
+    int max_length = 0;
+    int total_wire_l = 0;
+    via_count = 0;
 
     for (int i = 0; i < nets.size(); i++)
     {
@@ -560,7 +587,7 @@ void MazeRouter::route()
         {
             resetGridCosts();
             Coordinate target = fill(sources);
-            printGridCosts();
+            // printGridCosts();
 
             if (target.row == -1 && target.col == -1 && target.layer == -1)
             {
@@ -578,6 +605,12 @@ void MazeRouter::route()
             writeRoute(temp_route);
             cout << endl;
 
+            if(temp_route.size()>max_length){
+                max_length = temp_route.size();
+                longest_route = temp_route;
+            }
+            total_wire_l += temp_route.size();
+
             sources.clear();
             for (int k = 0; k < route.size(); k++)
             {
@@ -593,6 +626,13 @@ void MazeRouter::route()
 
         // cout << "\nFinal Route for Net " << i << ":\n";
         // writeRoute(route);
-        cout << "\n------------------------------------\n";
+
     }
+    cout << "\n------------------------------------\n";
+    cout << "\nMetrics Report: \n";
+    cout << "==================\n";
+    cout << "\nLength of longest route: " << max_length <<"\n";
+    cout << "\nTotal wire length: " << total_wire_l<< "\n";
+    cout << "\nTotal number of vias: " << via_count<< "\n";
+    cout << "\n------------------------------------\n";
 }
