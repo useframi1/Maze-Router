@@ -19,7 +19,7 @@ enum Type
     Source,      // 1
     Target,      // 2
     Empty,       // 3
-    Via          // 4
+    Via,         // 4
 };
 
 struct Cell
@@ -50,8 +50,13 @@ public:
     int width;
     int bend_pen;
     int via_pen;
+
     string input_file;
     string output_file;
+
+    int via_count = 0;
+    int max_length = 0;
+    int total_wire_l = 0;
 
     /// @brief The constructor for the maze router
     /// @param input_file The path of the input file having all the router information
@@ -66,6 +71,9 @@ public:
 
     /// @brief Add a net to the nets vector
     void addNet(string line);
+
+    /// @brief Reserves source and targets for the nets
+    void reserveCells();
 
     /// @brief Orders the nets based on the total manhattan distance of the net
     void orderNets();
@@ -86,7 +94,7 @@ public:
     vector<Coordinate> back_propagate(Coordinate target);
 
     /// @brief Saves progress in file.
-    void writeRoute(vector<Coordinate> route);
+    void writeRoute(int net, vector<Coordinate> route);
 
     /// @brief Re-Initializes all cell costs to 0
     void resetGridCosts();

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
     MazeRouter router(argv[1], argv[2]);
 
-    cout << "Router initialized\n";
+    cout << "\nRouter initialized\n";
     cout << "Maze dimentions: " << router.length << " x " << router.width << endl;
     cout << "Bend penalty: " << router.bend_pen << endl;
     cout << "Via penalty: " << router.via_pen << endl;
