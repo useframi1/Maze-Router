@@ -23,7 +23,7 @@ export default function MultiSelectDropdown({
         setIsJsEnabled(true);
         // Notify parent component of initial selection only once
         onChange(options);
-    }, []); // Empty dependency array ensures this runs only once
+    }, [onChange, options]); // Empty dependency array ensures this runs only once
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const isChecked = e.target.checked;

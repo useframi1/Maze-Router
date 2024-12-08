@@ -1,4 +1,4 @@
-import { GridData, Route, RouteStep } from "./types";
+import { GridData, GridDimensions, Route, RouteStep } from "./types";
 import { promises as fs } from "fs";
 
 /**
@@ -6,7 +6,7 @@ import { promises as fs } from "fs";
  * net1 (1, 10, 20) (1, 11, 20) (1, 12, 20)
  * net2 (2, 100, 200) (2, 100, 201) (2, 100, 202)
  */
-export const readFileAndParseData = async (): Promise<Route[]> => {
+export const readRoutes = async (): Promise<Route[]> => {
     // Read the file content
     const file = await fs.readFile(
         process.cwd() + "/src/app/input.txt",
@@ -44,14 +44,26 @@ export const readFileAndParseData = async (): Promise<Route[]> => {
                         if (step.layer !== path[0].layer) {
                             path[0].isVia = true;
                         } else {
-                            path[0].direction = "opposite";
+                            if (path.length > 1) {
+                                if (
+                                    step.x === path[1].x &&
+                                    step.y !== path[1].y &&
+                                    step.direction === "horizontal"
+                                ) {
+                                    path[0].direction = "opposite";
+                                } else if (
+                                    step.x !== path[1].x &&
+                                    step.y === path[1].y &&
+                                    step.direction === "vertical"
+                                ) {
+                                    path[0].direction = "opposite";
+                                } else {
+                                    path[0].direction = step.direction;
+                                }
+                            }
+                            path[0].isVia = step.isVia;
                         }
 
-                        if (path[0].x !== step.x) {
-                            path[0].direction = "horizontal";
-                        } else if (path[0].y !== step.y) {
-                            path[0].direction = "vertical";
-                        }
                         found = true;
                         break;
                     }
@@ -59,45 +71,30 @@ export const readFileAndParseData = async (): Promise<Route[]> => {
                 prevRouteIndex--;
             }
         }
-        for (let i = 1; i < path.length; i++) {
+        for (let i = 1; i < path.length - 1; i++) {
             const prev = path[i - 1];
             const curr = path[i];
+            const next = path[i + 1];
 
             if (curr.layer === prev.layer) {
-                if (curr.x !== prev.x && curr.y === prev.y) {
-                    // Horizontal direction: x changes, y remains the same
+                if (
+                    curr.x !== prev.x &&
+                    (curr.x !== next.x || curr.layer !== next.layer)
+                ) {
                     path[i].direction = "horizontal";
-                } else if (curr.y !== prev.y && curr.x === prev.x) {
-                    // Vertical direction: y changes, x remains the same
+                } else if (
+                    curr.y !== prev.y &&
+                    (curr.y !== next.y || curr.layer !== next.layer)
+                ) {
                     path[i].direction = "vertical";
-                }
-
-                // Mark opposite direction when there's a change from horizontal to vertical or vice versa
-                if (i > 1) {
-                    const prevPrev = path[i - 2];
-                    const prevDirection = prevPrev.direction;
-                    const currDirection = path[i].direction;
-                    if (prevPrev.layer === curr.layer && i - 2 >= 0) {
-                        if (prevDirection === "opposite") {
-                            if (
-                                prevPrev.x !== curr.x &&
-                                prevPrev.y !== curr.y
-                            ) {
-                                path[i - 1].direction = "opposite";
-                            }
-                        }
-                        if (
-                            (prevDirection === "horizontal" &&
-                                currDirection === "vertical") ||
-                            (prevDirection === "vertical" &&
-                                currDirection === "horizontal")
-                        ) {
-                            path[i - 1].direction = "opposite";
-                        }
-                    }
+                } else if (curr.x === prev.x && curr.y === next.y) {
+                    path[i].direction = "opposite";
+                } else if (curr.x === next.x && curr.y === prev.y) {
+                    path[i].direction = "opposite";
                 }
             } else {
                 path[i].isVia = true;
+                path[i - 1].isVia = true;
                 if (i + 1 < path.length) {
                     const next = path[i + 1];
 
@@ -172,4 +169,14 @@ export const getNets = (routes: Route[]) => {
     }
 
     return Array.from(nets);
+};
+
+export const readGridDimensions = async (): Promise<GridDimensions> => {
+    const file = await fs.readFile(
+        process.cwd() + "/src/app/grid_dimensions.txt",
+        "utf8"
+    );
+    const lines = file.split("\n");
+    const [cols, rows] = lines[0].split(" ").map(Number);
+    return { rows, cols };
 };

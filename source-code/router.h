@@ -58,6 +58,9 @@ public:
     int max_length = 0;
     int total_wire_l = 0;
 
+    const string ui_route_path = "../labyrinth/src/app/input.txt";
+    const string ui_dimensions_path = "../labyrinth/src/app/grid_dimensions.txt";
+
     /// @brief The constructor for the maze router
     /// @param input_file The path of the input file having all the router information
     /// @param output_file The path of the output file that will hold the routes for all the nets
@@ -95,6 +98,15 @@ public:
 
     /// @brief Saves progress in file.
     void writeRoute(int net, vector<Coordinate> route);
+
+    /// @brief Truncates the file
+    void truncateUIRouteFile();
+
+    /// @brief Writes the route to the UI directory
+    void writeRouteToUI(int net, vector<Coordinate> route);
+
+    /// @brief Writes the dimensions to the UI directory
+    void writeDimensionsToUI();
 
     /// @brief Re-Initializes all cell costs to 0
     void resetGridCosts();

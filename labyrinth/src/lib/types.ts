@@ -1,5 +1,10 @@
 export type Direction = "horizontal" | "vertical" | "opposite";
 
+export interface GridDimensions {
+    rows: number;
+    cols: number;
+}
+
 export interface RouteStep {
     layer: number; // 1 for M1, 2 for M2
     x: number; // X coordinate

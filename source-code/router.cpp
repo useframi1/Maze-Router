@@ -5,7 +5,9 @@ MazeRouter::MazeRouter(string input_file, string output_file)
     this->input_file = input_file;
     this->output_file = output_file;
 
+    truncateUIRouteFile();
     initialize();
+    writeDimensionsToUI();
     reserveCells();
     orderNets();
 }
@@ -109,11 +111,11 @@ void MazeRouter::reserveCells()
 {
     for (int i = 0; i < nets.size(); i++)
     {
-        for (int j = 0; j < nets[i].size(); j++){
+        for (int j = 0; j < nets[i].size(); j++)
+        {
             grid[nets[i][j].layer][nets[i][j].row][nets[i][j].col].type = Type::Obstruction;
         }
     }
-   
 }
 
 void MazeRouter::orderNets()
@@ -538,6 +540,63 @@ void MazeRouter::writeRoute(int net, vector<Coordinate> route)
     file.close();
 }
 
+void MazeRouter::truncateUIRouteFile()
+{
+    // Open the file in truncation mode
+    ofstream file(ui_route_path, ios::trunc);
+
+    if (file.is_open())
+    {
+        cout << "File has been cleared successfully." << endl;
+        file.close();
+    }
+    else
+    {
+        cerr << "Failed to open the file." << endl;
+    }
+}
+
+void MazeRouter::writeRouteToUI(int net, vector<Coordinate> route)
+{
+    // Writing into the output file for the routes
+    ofstream file;
+    file.open(ui_route_path, ios::app);
+    if (!file.is_open())
+    {
+        cerr << "Error: Unable to open file.\n";
+        return;
+    }
+
+    // Write the route to the file in the from (layer, col, row)
+    file << "net" << net << " ";
+    for (int i = 0; i < route.size(); i++)
+    {
+        file << "(" << route[i].layer << "," << route[i].col << "," << route[i].row << ")";
+        if (i != route.size() - 1)
+        {
+            file << " ";
+        }
+    }
+    file << endl;
+    file.close();
+}
+
+void MazeRouter::writeDimensionsToUI()
+{
+    // Writing into the output file for the routes
+    ofstream file;
+    file.open(ui_dimensions_path);
+    if (!file.is_open())
+    {
+        cerr << "Error: Unable to open file.\n";
+        return;
+    }
+
+    file << width << " " << length;
+    file << endl;
+    file.close();
+}
+
 void MazeRouter::resetGridCosts()
 {
     for (int i = 0; i < NUM_LAYERS; i++)
@@ -631,6 +690,7 @@ void MazeRouter::route()
 
             cout << "\nRoute for target " << j << ":\n";
             writeRoute(i, temp_route);
+            writeRouteToUI(i, temp_route);
             cout << endl;
 
             if (temp_route.size() > max_length)
