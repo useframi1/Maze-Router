@@ -1,4 +1,4 @@
-import { GridData, Route, RouteStep, MetalLayerData } from "./types";
+import { GridData, Route, RouteStep } from "./types";
 import { promises as fs } from "fs";
 
 /**
@@ -18,6 +18,8 @@ export const readFileAndParseData = async (): Promise<Route[]> => {
 
     const routes: Route[] = [];
 
+    let prevNet = "";
+
     for (const line of lines) {
         const [net, ...points] = line.split(/\s+/);
 
@@ -29,7 +31,34 @@ export const readFileAndParseData = async (): Promise<Route[]> => {
             return { layer, x, y, direction: "horizontal", isVia: false }; // Default direction is 'horizontal'
         });
 
-        // Infer directions for the path and mark opposite directions
+        if (net === prevNet) {
+            let prevRouteIndex = routes.length - 1;
+            let found = false;
+            while (
+                prevRouteIndex >= 0 &&
+                routes[prevRouteIndex].net === net &&
+                !found
+            ) {
+                for (const step of routes[prevRouteIndex].path) {
+                    if (step.x === path[0].x && step.y === path[0].y) {
+                        if (step.layer !== path[0].layer) {
+                            path[0].isVia = true;
+                        } else {
+                            path[0].direction = "opposite";
+                        }
+
+                        if (path[0].x !== step.x) {
+                            path[0].direction = "horizontal";
+                        } else if (path[0].y !== step.y) {
+                            path[0].direction = "vertical";
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                prevRouteIndex--;
+            }
+        }
         for (let i = 1; i < path.length; i++) {
             const prev = path[i - 1];
             const curr = path[i];
@@ -48,7 +77,15 @@ export const readFileAndParseData = async (): Promise<Route[]> => {
                     const prevPrev = path[i - 2];
                     const prevDirection = prevPrev.direction;
                     const currDirection = path[i].direction;
-                    if (path[i - 2].layer === curr.layer) {
+                    if (prevPrev.layer === curr.layer && i - 2 >= 0) {
+                        if (prevDirection === "opposite") {
+                            if (
+                                prevPrev.x !== curr.x &&
+                                prevPrev.y !== curr.y
+                            ) {
+                                path[i - 1].direction = "opposite";
+                            }
+                        }
                         if (
                             (prevDirection === "horizontal" &&
                                 currDirection === "vertical") ||
@@ -77,6 +114,7 @@ export const readFileAndParseData = async (): Promise<Route[]> => {
             }
         }
 
+        prevNet = net;
         routes.push({ net, path });
     }
 
@@ -93,34 +131,45 @@ export const fillGridData = (
             net: undefined,
             M1: undefined,
             M2: undefined,
-            via: false,
-            isSource: false,
-            isTarget: false,
+            via: "",
+            source: "",
+            target: "",
         }))
     );
 
     let counter = 0;
+    let prevNet = "";
 
     for (const { net, path } of routes) {
         for (const { layer, x, y, direction, isVia } of path) {
-            if (counter === 0) {
-                grid[y][x].isSource = true;
+            if (counter === 0 && net !== prevNet) {
+                grid[y][x].source = net;
             } else if (counter === path.length - 1) {
-                grid[y][x].isTarget = true;
+                grid[y][x].target = net;
             }
 
-            grid[y][x].net = net;
-            if (layer === 1) {
-                grid[y][x].M1 = direction;
-            } else if (layer === 2) {
-                grid[y][x].M2 = direction;
+            if (layer === 0) {
+                grid[y][x].M1 = { net, direction };
+            } else if (layer === 1) {
+                grid[y][x].M2 = { net, direction };
             }
 
-            grid[y][x].via = isVia;
+            grid[y][x].via = isVia ? net : "";
             counter++;
         }
         counter = 0;
+        prevNet = net;
     }
 
     return grid;
+};
+
+export const getNets = (routes: Route[]) => {
+    const nets = new Set<string>();
+
+    for (const route of routes) {
+        nets.add(route.net);
+    }
+
+    return Array.from(nets);
 };

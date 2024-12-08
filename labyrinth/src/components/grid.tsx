@@ -6,20 +6,11 @@ import MultiSelectDropdown from "./multi-select-dropdown";
 import { useState } from "react";
 
 interface GridProps {
-    grid: GridData; // The 2D grid structure passed as a prop
+    grid: GridData;
+    nets: string[];
 }
 
-export default function Grid({ grid }: GridProps) {
-    const nets = new Set<string>();
-
-    for (const row of grid) {
-        for (const cell of row) {
-            if (cell.net) {
-                nets.add(cell.net);
-            }
-        }
-    }
-
+export default function Grid({ grid, nets }: GridProps) {
     const [selectedNets, setSelectedNets] = useState<string[]>([]);
 
     return (
@@ -35,14 +26,11 @@ export default function Grid({ grid }: GridProps) {
                 >
                     {grid.map((row, rowIndex) =>
                         row.map((cell, colIndex) => {
-                            const renderCell =
-                                cell.net && !selectedNets.includes(cell.net);
-
                             return (
                                 <Cell
                                     key={`${rowIndex}-${colIndex}`}
                                     cell={cell}
-                                    renderData={!renderCell}
+                                    selectedNets={selectedNets}
                                 />
                             );
                         })
@@ -52,7 +40,7 @@ export default function Grid({ grid }: GridProps) {
             <div className="basis-1/4 flex justify-center fixed top-0 right-0 p-4">
                 <MultiSelectDropdown
                     formFieldName="Nets"
-                    options={Array.from(nets)}
+                    options={nets}
                     onChange={setSelectedNets}
                 />
             </div>

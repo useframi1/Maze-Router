@@ -19,12 +19,11 @@ export interface MetalLayerData {
 }
 
 export interface CellData {
-    net: string | undefined;
-    M1: Direction | undefined; // Metal Layer 1 (horizontal preferred)
-    M2: Direction | undefined; // Metal Layer 2 (vertical preferred)
-    via: boolean; // Nets with vias
-    isSource: boolean;
-    isTarget: boolean;
+    M1: MetalLayerData | undefined; // Metal Layer 1 (horizontal preferred)
+    M2: MetalLayerData | undefined; // Metal Layer 2 (vertical preferred)
+    via: string; // Nets with vias
+    source: string;
+    target: string;
 }
 
 export type GridData = CellData[][];
