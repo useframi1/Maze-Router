@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.via-pattern {
+    @apply border-4 border-black bg-red-600;
+}
+
+.source-pattern {
+    @apply border-4 border-black bg-slate-400;
+}
+
+.target-pattern {
+    @apply border-4 border-black bg-lime-300;
+}
