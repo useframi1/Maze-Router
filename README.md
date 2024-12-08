@@ -38,7 +38,7 @@ The following steps are repeated per net
 - If an adjacent cell is found as a target we signal a hit and move on
 #### Backpropagation 
 - Takes the coordinate of the hit tagert
-- It will observe the surroundong cells and choose the next cell as the one with the lowest cost
+- It will observe the surrounding cells and choose the next cell as the one with the lowest cost
 - If the cell is marked as a Via we automatically switch layers
 - These steps are repeated until we find a source
 
