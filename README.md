@@ -20,12 +20,17 @@ To begin we read the file line by line so that we can:
 2. If the line is an obstruction, we validated its coordinated and add it to the grid.
 3. If the line is a net, we validate and save each coordinate in a vector which is then saved in a list of nets
 
+### Net Ordering Bonus 
+We implemented the net ordering heuristic of prioritizing the net with the minimum Manhattan distance between the 
+source and target. Such an approach offers great congestion management in a simple and computationally efficient 
+way.
+
 ### Routing
 The following steps are repeated per net
 #### Mapping Net to Grid
 - loop over the coordinates of the net
 - The first coordinate gets set as the source on the grid
-- Any other coordinate is set as a terget
+- Any other coordinate is set as a target
 
 #### Filling
 - We begin with a vector of our sources
@@ -33,7 +38,7 @@ The following steps are repeated per net
 - If an adjacent cell is found as a target we signal a hit and move on
 #### Backpropagation 
 - Takes the coordinate of the hit tagert
-- It will observe the surroundong cells and choose the next cell as the one with the lowest cost
+- It will observe the surrounding cells and choose the next cell as the one with the lowest cost
 - If the cell is marked as a Via we automatically switch layers
 - These steps are repeated until we find a source
 
