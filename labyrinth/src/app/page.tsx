@@ -18,6 +18,7 @@ export default async function Home() {
         <>
             <PopupMessageEmitter routes={routes} />
             <div className="flex flex-col h-full gap-3">
+                <div className="text-3xl ps-10">Labyrinth</div>
                 <div className="flex items-center justify-center flex-1 overflow-hidden">
                     <div className="h-full w-full overflow-auto flex justify-center items-center">
                         <Grid grid={grid} nets={nets} />
