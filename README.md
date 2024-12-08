@@ -30,7 +30,7 @@ The following steps are repeated per net
 #### Mapping Net to Grid
 - loop over the coordinates of the net
 - The first coordinate gets set as the source on the grid
-- Any other coordinate is set as a terget
+- Any other coordinate is set as a target
 
 #### Filling
 - We begin with a vector of our sources
