@@ -20,6 +20,11 @@ To begin we read the file line by line so that we can:
 2. If the line is an obstruction, we validated its coordinated and add it to the grid.
 3. If the line is a net, we validate and save each coordinate in a vector which is then saved in a list of nets
 
+### Net Ordering Bonus 
+We implemented the net ordering heuristic of prioritizing the net with the minimum Manhattan distance between the 
+source and target. Such an approach offers great congestion management in a simple and computationally efficient 
+way.
+
 ### Routing
 The following steps are repeated per net
 #### Mapping Net to Grid
